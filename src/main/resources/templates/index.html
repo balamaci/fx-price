@@ -35,12 +35,12 @@
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
                         <div class="row">
-                            <div class="col"><h4>BUY [[${currencyPair.first}]]</h4></div><div class="col"><h4 data-th-id="${currencyPair.pairNoSep} + '-buy-price'" class="text-right price"></h4> <i data-th-id="${currencyPair.pairNoSep}+'-buy-arrow'"></i></div>
+                            <div class="col"><h4>BUY [[${currencyPair.first}]]  <i data-th-id="${currencyPair.pairNoSep}+'-BUY-arrow'"></i></h4></div><div class="col"><h4 data-th-id="${currencyPair.pairNoSep} + '-BUY-price'" class="text-right price"></h4></div>
                         </div>
                     </li>
                     <li class="list-group-item">
                         <div class="row">
-                            <div class="col"><h4>SELL [[${currencyPair.first}]]</h4></div><div class="col"><h4 data-th-id="${currencyPair.pairNoSep} + '-sell-price'" class="text-right price"></h4> <i data-th-id="${currencyPair.pairNoSep}+'-buy-arrow'"></i></div>
+                            <div class="col"><h4>SELL [[${currencyPair.first}]] <i data-th-id="${currencyPair.pairNoSep}+'-SELL-arrow'"></i></h4></div><div class="col"><h4 data-th-id="${currencyPair.pairNoSep} + '-SELL-price'" class="text-right price"></h4></div>
                         </div>
                     </li>
                 </ul>
@@ -66,8 +66,23 @@ socket.onmessage = function (e) {
     console.log('Received ' + e.data);
     var json = JSON.parse(e.data);
     var currency = json.currencyPair;
-    currency = currency.replace(/\//g , "_");
-    console.log('currency = ' + currency);
+    currency = currency.replace(/\//g , "");
+
+    var side = json.side;
+
+    var oldPrice = $('#' + currency).data(json.side + '-price');
+    $('#' + currency).data(json.side + '-price', json.price);
+    var arrow = '';
+    if(json.price > oldPrice) {
+        arrow = 'up';
+        $('#' + currency + '-' + json.side + '-arrow').attr("class","arrow " + arrow);
+    }
+    if(json.price < oldPrice) {
+        arrow = 'down';
+        $('#' + currency + '-' + json.side + '-arrow').attr("class","arrow " + arrow);
+    }
+
+    $('#' + currency + '-' + side + '-price').text(json.price);
 
 }
 }

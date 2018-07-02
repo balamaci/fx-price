@@ -9,6 +9,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.TopicProcessor;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,6 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class SpotPriceConfiguration {
+
+    private Random rand = new Random();
 
     @Bean
     public Flux<Price> generateSpotPrices() {
@@ -25,18 +28,29 @@ public class SpotPriceConfiguration {
                 .bufferSize(4)
                 .build();
 
-        Random rand = new Random();
 
         scheduler.scheduleAtFixedRate(() -> {
-            if(ticker.hasDownstreams()) {
-                BigDecimal priceVal = new BigDecimal(rand.nextInt(100) / 100);
-                Price price = new Price(CurrencyPair.EUR_USD, Side.BUY, priceVal);
+            Arrays.stream(CurrencyPair.values())
+                    .forEach(currencyPair -> {
+                        if(shouldUpdateCurrency()) {
+                            BigDecimal priceVal = new BigDecimal(rand.nextInt(100) % 100);
+                            Price price = new Price(currencyPair, Side.BUY, priceVal);
 
-                ticker.onNext(price);
+                            ticker.onNext(price);
+                        }
+                    });
+
+            if(ticker.hasDownstreams()) {
+                BigDecimal priceVal = new BigDecimal(rand.nextInt(100) % 100);
+                Price price = new Price(CurrencyPair.EUR_USD, Side.BUY, priceVal);
             }
         }, 0, 1, TimeUnit.SECONDS);
 
         return ticker;
+    }
+
+    private boolean shouldUpdateCurrency() {
+        return rand.nextInt(10) > 8;
     }
 
 }

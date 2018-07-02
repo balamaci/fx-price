@@ -22,7 +22,6 @@ public enum CurrencyPair {
         return first + "/" + second;
     }
 
-    @JsonValue
     public String getPairNoSep() {
         return first + second;
     }
