@@ -9,6 +9,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.TopicProcessor;
 
 import java.math.BigDecimal;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -24,12 +25,16 @@ public class SpotPriceConfiguration {
                 .bufferSize(4)
                 .build();
 
-        scheduler.scheduleAtFixedRate(() -> {
-            BigDecimal priceVal = new BigDecimal(System.currentTimeMillis() % 1000);
-            Price price = new Price(CurrencyPair.EUR_USD, Side.BID, priceVal);
+        Random rand = new Random();
 
-            ticker.onNext(price);
-        }, 0, 250, TimeUnit.MILLISECONDS);
+        scheduler.scheduleAtFixedRate(() -> {
+            if(ticker.hasDownstreams()) {
+                BigDecimal priceVal = new BigDecimal(rand.nextInt(100) / 100);
+                Price price = new Price(CurrencyPair.EUR_USD, Side.BUY, priceVal);
+
+                ticker.onNext(price);
+            }
+        }, 0, 1, TimeUnit.SECONDS);
 
         return ticker;
     }

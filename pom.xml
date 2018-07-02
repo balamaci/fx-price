@@ -42,6 +42,8 @@
 		<!-- end::tomcat[] -->
 
 		<!-- tag::webjars[] -->
+
+
 		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>bootstrap</artifactId>

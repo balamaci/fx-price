@@ -1,0 +1,19 @@
+ i.arrow {
+    border: solid black;
+    border-width: 0 5px 5px 0 !important;
+    display: inline-block;
+    padding: 5px;
+    margin-left: 10px;
+}
+
+i.arrow.up {
+    border: solid green;
+    transform: rotate(-135deg);
+    -webkit-transform: rotate(-135deg);
+}
+
+i.arrow.down {
+    border: solid #f00;
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+}
