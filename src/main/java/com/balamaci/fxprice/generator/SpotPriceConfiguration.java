@@ -25,32 +25,29 @@ public class SpotPriceConfiguration {
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         TopicProcessor<Price> ticker = TopicProcessor.<Price>builder()
-                .bufferSize(4)
+                .bufferSize(16)
                 .build();
 
 
-        scheduler.scheduleAtFixedRate(() -> {
-            Arrays.stream(CurrencyPair.values())
-                    .forEach(currencyPair -> {
-                        if(shouldUpdateCurrency()) {
-                            BigDecimal priceVal = new BigDecimal(rand.nextInt(100) % 100);
-                            Price price = new Price(currencyPair, Side.BUY, priceVal);
+        scheduler.scheduleAtFixedRate(() -> Arrays.stream(CurrencyPair.values())
+                .forEach(currencyPair -> {
+                    if(shouldUpdateCurrency()) {
+                        BigDecimal priceVal = new BigDecimal(rand.nextInt(100) % 100);
+                        Price price = new Price(currencyPair, randomSide(), priceVal);
 
-                            ticker.onNext(price);
-                        }
-                    });
-
-            if(ticker.hasDownstreams()) {
-                BigDecimal priceVal = new BigDecimal(rand.nextInt(100) % 100);
-                Price price = new Price(CurrencyPair.EUR_USD, Side.BUY, priceVal);
-            }
-        }, 0, 1, TimeUnit.SECONDS);
+                        ticker.onNext(price);
+                    }
+                }), 0, 500, TimeUnit.MILLISECONDS);
 
         return ticker;
     }
 
     private boolean shouldUpdateCurrency() {
-        return rand.nextInt(10) > 8;
+        return rand.nextInt(10) > 2;
+    }
+
+    private Side randomSide() {
+        return rand.nextInt(2) == 0 ? Side.BUY: Side.SELL;
     }
 
 }

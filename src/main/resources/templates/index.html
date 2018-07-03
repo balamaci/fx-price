@@ -25,22 +25,22 @@
 
 <div id="spot-prices" class="container wrapper">
 
-    <div class="row">
+    <div class="row" data-th-each="element: ${currenciesMap}" style="margin-bottom:20px">
 
-        <div class="col" data-th-each="currencyPair: ${currencies}">
+        <div class="col-md" data-th-each="currencyPair: ${element.value}">
             <div data-th-id="${currencyPair.pairNoSep}" class="card">
                 <div class="card-header">
-                    <h3>[[${currencyPair.pair}]]</h3>
+                    <h4>[[${currencyPair.pair}]]</h4>
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
                         <div class="row">
-                            <div class="col"><h4>BUY [[${currencyPair.first}]]  <i data-th-id="${currencyPair.pairNoSep}+'-BUY-arrow'"></i></h4></div><div class="col"><h4 data-th-id="${currencyPair.pairNoSep} + '-BUY-price'" class="text-right price"></h4></div>
+                            <div class="col"><h5>BUY [[${currencyPair.first}]]  <i data-th-id="${currencyPair.pairNoSep}+'-BUY-arrow'"></i></h5></div><div class="col"><h5 data-th-id="${currencyPair.pairNoSep} + '-BUY-price'" class="text-right price"></h5></div>
                         </div>
                     </li>
                     <li class="list-group-item">
                         <div class="row">
-                            <div class="col"><h4>SELL [[${currencyPair.first}]] <i data-th-id="${currencyPair.pairNoSep}+'-SELL-arrow'"></i></h4></div><div class="col"><h4 data-th-id="${currencyPair.pairNoSep} + '-SELL-price'" class="text-right price"></h4></div>
+                            <div class="col"><h5>SELL [[${currencyPair.first}]] <i data-th-id="${currencyPair.pairNoSep}+'-SELL-arrow'"></i></h5></div><div class="col"><h5 data-th-id="${currencyPair.pairNoSep} + '-SELL-price'" class="text-right price"></h5></div>
                         </div>
                     </li>
                 </ul>
@@ -83,7 +83,6 @@ socket.onmessage = function (e) {
     }
 
     $('#' + currency + '-' + side + '-price').text(json.price);
-
 }
 }
 });

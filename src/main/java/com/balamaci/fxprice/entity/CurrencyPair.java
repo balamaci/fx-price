@@ -6,8 +6,11 @@ public enum CurrencyPair {
 
     EUR_USD("EUR", "USD"),
     EUR_CHF("EUR", "CHF"),
+    EUR_GBP("EUR", "GBP"),
     EUR_JPY("EUR", "JPY"),
-    EUR_SGD("EUR", "SGD");
+    EUR_SGD("EUR", "SGD"),
+    USD_SGD("USD", "SGD"),
+    GBP_USD("GBP", "USD");
 
     private String first;
     private String second;
