@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.TopicProcessor;
+import reactor.util.concurrent.WaitStrategy;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -25,13 +26,20 @@ public class SpotPriceConfiguration {
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         TopicProcessor<Price> ticker = TopicProcessor.<Price>builder()
+                .name("spot-price-topic")
+                .waitStrategy(WaitStrategy.sleeping())
+//                .executor(Executors.newFixedThreadPool(20))
                 .bufferSize(16)
                 .build();
 
 
         scheduler.scheduleAtFixedRate(() -> Arrays.stream(CurrencyPair.values())
                 .forEach(currencyPair -> {
-                    if(shouldUpdateCurrency()) {
+                    if(! ticker.hasDownstreams()) {
+                        return;
+                    }
+
+                    if(shouldUpdateCurrencyRandomFactor()) {
                         BigDecimal priceVal = new BigDecimal(rand.nextInt(100) % 100);
                         Price price = new Price(currencyPair, randomSide(), priceVal);
 
@@ -42,7 +50,7 @@ public class SpotPriceConfiguration {
         return ticker;
     }
 
-    private boolean shouldUpdateCurrency() {
+    private boolean shouldUpdateCurrencyRandomFactor() {
         return rand.nextInt(10) > 2;
     }
 
