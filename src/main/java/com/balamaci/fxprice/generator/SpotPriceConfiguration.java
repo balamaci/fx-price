@@ -6,8 +6,6 @@ import com.balamaci.fxprice.entity.Side;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.TopicProcessor;
-import reactor.util.concurrent.WaitStrategy;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -23,32 +21,21 @@ public class SpotPriceConfiguration {
 
     @Bean
     public Flux<Price> generateSpotPrices() {
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        return Flux.<Price>create(emitter -> {
+            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-        TopicProcessor<Price> ticker = TopicProcessor.<Price>builder()
-                .name("spot-price-topic")
-                .waitStrategy(WaitStrategy.sleeping())
-//                .executor(Executors.newFixedThreadPool(20))
-                .bufferSize(16)
-                .build();
+            scheduler.scheduleAtFixedRate(() -> Arrays.stream(CurrencyPair.values())
+                    .forEach(currencyPair -> {
+                        if(shouldUpdateCurrencyRandomFactor()) {
+                            BigDecimal priceVal = new BigDecimal(rand.nextInt(100) % 100);
+                            Price price = new Price(currencyPair, randomSide(), priceVal);
 
-
-        scheduler.scheduleAtFixedRate(() -> Arrays.stream(CurrencyPair.values())
-                .forEach(currencyPair -> {
-                    if(! ticker.hasDownstreams()) {
-                        return;
-                    }
-
-                    if(shouldUpdateCurrencyRandomFactor()) {
-                        BigDecimal priceVal = new BigDecimal(rand.nextInt(100) % 100);
-                        Price price = new Price(currencyPair, randomSide(), priceVal);
-
-                        ticker.onNext(price);
-                    }
-                }), 0, 500, TimeUnit.MILLISECONDS);
-
-        return ticker;
+                            emitter.next(price);
+                        }
+                    }), 0, 500, TimeUnit.MILLISECONDS);
+        }).share();
     }
+
 
     private boolean shouldUpdateCurrencyRandomFactor() {
         return rand.nextInt(10) > 2;

@@ -40,7 +40,7 @@ public class SpotPriceWebSocketHandlerTests {
                         session.receive()
                                 .map(WebSocketMessage::getPayloadAsText)
                                 .take(count)
-//                                .log("com.balamaci.spot-client")
+                                .log("com.balamaci.spot-client")
                                 .subscribe(new SimpleLogSubscriber<String>(countDownLatch, subscriberID));
                         MonoProcessor<Void> completionMono = MonoProcessor.create();
                         return completionMono;
