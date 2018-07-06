@@ -16,3 +16,9 @@ i.arrow.down {
     transform: rotate(45deg);
     -webkit-transform: rotate(45deg);
 }
+
+em {
+    font-size: 1.55rem;
+    font-weight:bold;
+    font-style: normal;
+}

@@ -10,21 +10,8 @@
     <link rel="stylesheet" href="/style.css"/>
 </head>
 <body>
-<nav class="navbar navbar-default">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="/">Spring FX Trade</a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="/">Home</a></li>
-            </ul>
-        </div>
-    </div>
-</nav>
 
 <div id="spot-prices" class="container wrapper">
-
     <div class="row" data-th-each="element: ${currenciesMap}" style="margin-bottom:20px">
 
         <div class="col-md" data-th-each="currencyPair: ${element.value}">
@@ -35,12 +22,12 @@
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
                         <div class="row">
-                            <div class="col"><h5>BUY [[${currencyPair.first}]]  <i data-th-id="${currencyPair.pairNoSep}+'-BUY-arrow'"></i></h5></div><div class="col"><h5 data-th-id="${currencyPair.pairNoSep} + '-BUY-price'" class="text-right price"></h5></div>
+                            <div class="col"><h5>BUY [[${currencyPair.first}]]  <i data-th-id="${currencyPair.pairNoSep}+'-BUY-arrow'"></i></h5></div><div class="col"><h6 data-th-id="${currencyPair.pairNoSep} + '-BUY-price'" class="text-right price"></h6></div>
                         </div>
                     </li>
                     <li class="list-group-item">
                         <div class="row">
-                            <div class="col"><h5>SELL [[${currencyPair.first}]] <i data-th-id="${currencyPair.pairNoSep}+'-SELL-arrow'"></i></h5></div><div class="col"><h5 data-th-id="${currencyPair.pairNoSep} + '-SELL-price'" class="text-right price"></h5></div>
+                            <div class="col"><h5>SELL [[${currencyPair.first}]] <i data-th-id="${currencyPair.pairNoSep}+'-SELL-arrow'"></i></h5></div><div class="col"><h6 data-th-id="${currencyPair.pairNoSep} + '-SELL-price'" class="text-right price"></h6></div>
                         </div>
                     </li>
                 </ul>

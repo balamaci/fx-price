@@ -1,0 +1,6 @@
+generator: fake
+
+kafka_consumer:
+  consumer_id: spot_price
+  bootstrap_servers:
+  topics:
