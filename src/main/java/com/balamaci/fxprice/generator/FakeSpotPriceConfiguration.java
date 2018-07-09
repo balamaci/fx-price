@@ -1,8 +1,10 @@
 package com.balamaci.fxprice.generator;
 
 import com.balamaci.fxprice.entity.CurrencyPair;
-import com.balamaci.fxprice.entity.Price;
+import com.balamaci.fxprice.entity.Quote;
 import com.balamaci.fxprice.entity.Side;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,11 +24,11 @@ public class FakeSpotPriceConfiguration {
 
     private Random rand = new Random();
 
-
+    private static final Logger log = LoggerFactory.getLogger(FakeSpotPriceConfiguration.class);
 
     @Bean
-    public Flux<Price> generateSpotPrices() {
-        return Flux.<Price>create(sink -> {
+    public Flux<Quote> generateSpotPrices() {
+        return Flux.<Quote>create(sink -> {
             ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
             scheduler.scheduleAtFixedRate(() -> Arrays.stream(CurrencyPair.values())
@@ -34,13 +36,14 @@ public class FakeSpotPriceConfiguration {
                         if(! sink.isCancelled()) {
                             if (shouldUpdateCurrencyRandomFactor()) {
                                 BigDecimal priceVal = randomPrice();
-                                Price price = new Price(currencyPair, randomSide(), priceVal);
+                                Quote quote = new Quote(currencyPair, randomSide(), priceVal);
 
-                                sink.next(price);
+                                log.info("Pushing {}", quote);
+                                sink.next(quote);
                             }
                         }
                     }), 0, 200, TimeUnit.MILLISECONDS);
-        }, FluxSink.OverflowStrategy.DROP)
+        }, FluxSink.OverflowStrategy.LATEST)
                 .share();
     }
 

@@ -2,7 +2,7 @@ package com.balamaci.fxprice.entity;
 
 import java.math.BigDecimal;
 
-public class Price {
+public class Quote {
 
     private final CurrencyPair currencyPair;
 
@@ -10,7 +10,7 @@ public class Price {
 
     private final BigDecimal price;
 
-    public Price(CurrencyPair currencyPair, Side side, BigDecimal price) {
+    public Quote(CurrencyPair currencyPair, Side side, BigDecimal price) {
         this.currencyPair = currencyPair;
         this.side = side;
         this.price = price;
@@ -30,7 +30,7 @@ public class Price {
 
     @Override
     public String toString() {
-        return "Price{" +
+        return "Quote{" +
                 "currencyPair=" + currencyPair +
                 ", side=" + side +
                 ", price=" + price +

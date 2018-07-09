@@ -18,9 +18,9 @@ import java.util.concurrent.CountDownLatch;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class SpotPriceWebSocketHandlerTests {
+public class SpotQuoteWebSocketHandlerTests {
 
-	private static final Logger log = LoggerFactory.getLogger(SpotPriceWebSocketHandlerTests.class);
+	private static final Logger log = LoggerFactory.getLogger(SpotQuoteWebSocketHandlerTests.class);
 
 	@LocalServerPort
 	private String port;

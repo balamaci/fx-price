@@ -1,6 +1,6 @@
 package com.balamaci.fxprice.websocket;
 
-import com.balamaci.fxprice.entity.Price;
+import com.balamaci.fxprice.entity.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +17,7 @@ import java.util.Map;
 public class WebSocketRouter {
 
 	@Autowired
-	private Flux<Price> spotPricesStream;
+	private Flux<Quote> spotPricesStream;
 
 
 	@Bean

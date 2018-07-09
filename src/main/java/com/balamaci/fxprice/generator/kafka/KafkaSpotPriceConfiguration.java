@@ -1,6 +1,6 @@
 package com.balamaci.fxprice.generator.kafka;
 
-import com.balamaci.fxprice.entity.Price;
+import com.balamaci.fxprice.entity.Quote;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -26,18 +26,18 @@ public class KafkaSpotPriceConfiguration {
     private static final Logger log = LoggerFactory.getLogger(KafkaSpotPriceConfiguration.class);
 
     @Autowired
-    private KafkaConsumer<String, Price> consumer;
+    private KafkaConsumer<String, Quote> consumer;
 
     @Autowired
     private List<String> kafkaTopics;
 
     @Bean
-    public Flux<Price> generateSpotPrices() {
-        return Flux.<Price>create(this::receiveSpotPrices);
+    public Flux<Quote> generateSpotPrices() {
+        return Flux.<Quote>create(this::receiveSpotPrices);
     }
 
 
-    private void receiveSpotPrices(FluxSink<Price> sink) {
+    private void receiveSpotPrices(FluxSink<Quote> sink) {
         try {
             consumer.subscribe(kafkaTopics);
             log.info("KafkaConsumer subscribed to {} ..." + kafkaTopics);
@@ -48,13 +48,13 @@ public class KafkaSpotPriceConfiguration {
                 }
 
                 log.debug("Consumer polling ...");
-                ConsumerRecords<String, Price> records = consumer.poll(Long.MAX_VALUE);
+                ConsumerRecords<String, Quote> records = consumer.poll(Long.MAX_VALUE);
                 log.debug("Received {} records", records.count());
 
                 for (TopicPartition topicPartition : records.partitions()) {
-                    List<ConsumerRecord<String, Price>> topicRecords = records.records(topicPartition);
+                    List<ConsumerRecord<String, Quote>> topicRecords = records.records(topicPartition);
 
-                    for (ConsumerRecord<String, Price> record : topicRecords) {
+                    for (ConsumerRecord<String, Quote> record : topicRecords) {
                         log.debug("Consumer:Topic:{} => Partition={}, Offset={}, EventTime:[{}] Val={}",
                                 topicPartition.topic(), record.partition(), record.offset(),
                                 record.timestamp(), record.value());
