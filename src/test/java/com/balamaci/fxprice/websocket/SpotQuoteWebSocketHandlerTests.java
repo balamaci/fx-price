@@ -1,5 +1,6 @@
 package com.balamaci.fxprice.websocket;
 
+import org.assertj.core.util.Maps;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -14,6 +15,10 @@ import reactor.core.publisher.MonoProcessor;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 @RunWith(SpringRunner.class)
@@ -21,6 +26,8 @@ import java.util.concurrent.CountDownLatch;
 public class SpotQuoteWebSocketHandlerTests {
 
 	private static final Logger log = LoggerFactory.getLogger(SpotQuoteWebSocketHandlerTests.class);
+
+	private static final Map<Integer, Statistic> statisticsMap = new ConcurrentHashMap<>();
 
 	@LocalServerPort
 	private String port;
@@ -39,20 +46,37 @@ public class SpotQuoteWebSocketHandlerTests {
                     session -> {
                         session.receive()
                                 .map(WebSocketMessage::getPayloadAsText)
-                                .take(count)
+                                .delayElements(Duration.ofMillis(subscriberID % 2 == 0 ? 1000 : 0))
+								.take(count)
                                 .log("com.balamaci.spot-client")
-                                .subscribe(new SimpleLogSubscriber<String>(countDownLatch, subscriberID));
+                                .subscribe(new SimpleLogSubscriber<String>(countDownLatch, subscriberID, statisticsMap));
                         MonoProcessor<Void> completionMono = MonoProcessor.create();
                         return completionMono;
                     }).subscribe();
         }
 
 		countDownLatch.await();
+
+	    showStatistics();
 	}
 
+	private void showStatistics() {
+		Map<Integer, Integer> quotesReceivedAndSubscribers = new HashMap<>();
+
+		statisticsMap.forEach((key, value) -> {
+			Integer quotes = value.getQuotesReceived();
+
+			Integer subscribers = quotesReceivedAndSubscribers.getOrDefault(quotes, 0);
+			quotesReceivedAndSubscribers.put(quotes, subscribers + 1);
+		});
+
+		quotesReceivedAndSubscribers.forEach((key, val) -> log.info("{} quote - received by {} subscribers", key, val));
+	}
 
 
 	protected URI getUrl(String path) throws URISyntaxException {
 		return new URI("ws://localhost:" + this.port + path);
 	}
+
+
 }

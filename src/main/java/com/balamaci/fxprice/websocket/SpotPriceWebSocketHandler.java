@@ -47,9 +47,9 @@ public class SpotPriceWebSocketHandler implements WebSocketHandler {
                 })
                 .map(session::textMessage);
 
-        if(subscrId.get() % 2 == 0) {
-            wsMessage = wsMessage.delayElements(Duration.ofMillis(1000));
-        }
+//        if(subscrId.get() % 2 == 0) {
+//            wsMessage = wsMessage.delayElements(Duration.ofMillis(1000));
+//        }
 
 	    return session.send(wsMessage);
 	}

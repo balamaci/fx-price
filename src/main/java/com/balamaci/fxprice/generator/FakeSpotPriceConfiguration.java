@@ -56,6 +56,10 @@ public class FakeSpotPriceConfiguration {
         return new BigDecimal(rand.nextInt(100) % 100);
     }
 
+    /**
+     * Randomly generate a BUY or SELL Side for the Quote
+     * @return random either BUY or SELL
+     */
     private Side randomSide() {
         return rand.nextInt(2) == 0 ? Side.BUY: Side.SELL;
     }

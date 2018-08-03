@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.BaseSubscriber;
 
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SimpleLogSubscriber<T> extends BaseSubscriber<T> {
 
@@ -13,9 +15,15 @@ public class SimpleLogSubscriber<T> extends BaseSubscriber<T> {
     private CountDownLatch latch;
     private final int subscriberId;
 
-    public SimpleLogSubscriber(CountDownLatch latch, int subscriberId) {
+    private Map<Integer, Statistic> statisticsMap;
+
+    private int quotesReceived;
+
+    public SimpleLogSubscriber(CountDownLatch latch, int subscriberId,
+                               Map<Integer, Statistic> statisticsMap) {
         this.latch = latch;
         this.subscriberId = subscriberId;
+        this.statisticsMap = statisticsMap;
     }
 
 
@@ -27,10 +35,12 @@ public class SimpleLogSubscriber<T> extends BaseSubscriber<T> {
     @Override
     protected void hookOnNext(T value) {
         log.info("Subscriber {} received onNext:{}", subscriberId, value);
+        quotesReceived ++;
     }
 
     @Override
     protected void hookOnComplete() {
+        statisticsMap.put(subscriberId, new Statistic(quotesReceived));
         latch.countDown();
     }
 }

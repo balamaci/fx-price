@@ -1,0 +1,100 @@
+The world of financial markets it's more often the case that performance and scalability concerns matter more, take for ex. in the realm of FX(Forex - foreign exchange of currency) the price is continuously moving according to an always changing offer/demand of currently ongoing trades. Trading 10 mil EURO at an EUR/USD=1.1746 vs 1.1748 means a 2.000 USD difference and there are plenty of people looking to make a profit by making multiple trades even during a single day.
+
+#### Web sockets
+**Websockets** are the ideal candidates for these price "tickers", plain http polling just isn't to be considered because of our latency requirements. But even when compared to **ServerSentEvents**, **Websockets** fair better with lower latencies. But one of the big downsides of websockets is that there is always a connection live for each user, and in the traditional model with one thread per connection this translates to 1 user = 1thread. In this traditional model maybe we can hope for 2000 users with a single server(with decent hardware). Luckily the exchange rates are the same for all these users, so a message queue can distribute the price stream to multiple http servers, if you throw enough money to hardware(or cloud hosting), we can get to some tens of thousand users watching live ticking spot rates with the "old" model.
+
+Luckily with the addition of reactive programing which became a first class citizen in Spring 5 and Spring Boot 2, we can have easily those numbers being served by one server instance with **reactive websockets** which are very easy to setup.
+
+#### Spring boot reactive
+To start a Spring boot reactive project we . This means for now
+
+Lets ignore Kafka for now and just imagine **we have a very fast producing source of price quotes** for currencies.
+I said that the world is a very fast paced one, so another of the major requirements is that a slow receiving websocket consumer(maybe a user has a slow/bad network connection) should not slow neither the generation of quotes, neither the other consumers on their own fast connections. The price quotes expire quickly in a matter of a few seconds(users have a limited time to decide to trade on a quote), so it works to our advantage that we don't need to buffer the quotes, the subscribers only receive the latest quotes generated.
+
+This quote generator source matches what in reactive world is called a **Hot Publisher**, a Stream of events that is generating events at it's own pace, independent of the requests from the Subscribers or if they can keep up. If multiple subscribers are connected, if they connect at different times, they might miss on the old published events. This is actually what we want for our usecase.
+
+We can use **Flux.create()** into which we can start up a scheduler that produces random price quotes as soon as the first websocket connection is opened.
+
+```java
+    @Bean
+    public Flux<Quote> generateSpotPrices() {
+
+        return Flux.<Quote>create(sink -> {
+            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
+            scheduler.scheduleAtFixedRate(() -> Arrays.stream(CurrencyPair.values())
+                    .forEach(currencyPair -> {
+                        if(! sink.isCancelled()) {
+                             BigDecimal priceVal = randomPrice();
+                             Quote quote = new Quote(currencyPair, randomSide(), priceVal);
+
+                             log.info("Pushing {}", quote);
+                             sink.next(quote);
+                        }
+                    }), 0, 200, TimeUnit.MILLISECONDS);
+        }, FluxSink.OverflowStrategy.DROP)
+                    .share();
+    }
+```
+
+**.share()** is used because this Flux needs to be shared among all the live websocket connections and the events multicasted, not just a single subscriber.
+
+```java
+public class SpotPriceWebSocketHandler implements WebSocketHandler {
+
+    private AtomicLong subscrId = new AtomicLong(0);
+
+    private Flux<Quote> spotPricesStream;
+
+    public SpotPriceWebSocketHandler(Flux<Quote> spotPricesStream) {
+        this.spotPricesStream = spotPricesStream;
+    }
+
+    @Override
+    public Mono<Void> handle(WebSocketSession session) {
+        log.info("New web socket connection {}", subscrId.incrementAndGet());
+
+        Flux<WebSocketMessage> wsMessage = spotPricesStream
+                .onBackpressureDrop(val -> log.info("**DROPPED {}", val))
+                .map((price) -> {
+                    try {
+                        String json = jsonWriter.writeValueAsString(price);
+                        log.info("Mapping {}", json);
+                        return jsonWriter.writeValueAsString(price);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .log("com.balamaci.ws-handler")
+                .map(session::textMessage);
+
+        return session.send(wsMessage);
+    }
+}
+```
+
+The way this works is that Netty subscribes. The subscribe request travels up to our which adds the Subscription to a list of subscribers.
+
+When a new Quote is being generated the call to **sink.next()** offers the event sequencially to each subscriber in the queue, each subscriber being
+If the subscriber is not ready to process new quotes, it drops the event.
+
+has issued request()
+
+Now to test this we use the new reactive which also uses Netty so we're not using many threads while performance testing with many concurrent users.
+This would have been a bigger problem if we'd run both the testing clients and server on the same machine the testing clients.
+We couldn't have created many concurent clients, and a significant part of the resources would have been used for the clients in detriment of the server.
+
+
+
+#### Kafka
+Lets .
+1. There are multiple currency Brokers(vendors), each of these vendors are advertising different prices, we need to make sure we're picking the best price for the client.
+2. We need to keep a history of the received Quotes from all the brokers that provided a quote for each trade we make. This is a legal requirements(There were lots of regulations in the financial world introduced after the financial crysis of ).
+One of these rules covered under MIFID 2 requirements is that you need to prove that you provided the client with the best quote and that you are not having a side deal with a specific broker to give the client not the most advantageous price.
+So for each trade we make, we need to keep the all the quotes that were valid at the time, to prove we traded on the best one.
+
+Kafka and Kafka stream is a good tool to satisfy both the requiremets. We can have a Topic for each currency pair and push to it each broker's quote.
+By using kafka-streams we can use a sliding window to filter the best quote and just write . If we consider a Quote valid for 5 secs,
+If we agregate the vendor quotes. and
+and we can aggregate and show the response.
+
