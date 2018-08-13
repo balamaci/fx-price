@@ -3,6 +3,7 @@ package com.balamaci.fxprice.generator.kafka;
 import com.balamaci.fxprice.entity.Quote;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.IntegerDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -18,10 +19,10 @@ import java.util.Properties;
 @ConditionalOnProperty(value = "generator", havingValue = "kafka")
 public class KafkaConsumerConfiguration {
 
-    @Value("${kafka_consumer.bootstrap.servers}")
+    @Value("${kafka_consumer.bootstrap_servers}")
     private String kafkaServers;
 
-    @Value("${kafka_consumer.bootstrap.servers}")
+    @Value("${kafka_consumer.consumer_id}")
     private String consumerId;
 
     @Bean
@@ -29,7 +30,7 @@ public class KafkaConsumerConfiguration {
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, consumerId);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, IntegerDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");

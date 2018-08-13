@@ -13,6 +13,8 @@ public class SimpleLogSubscriber<T> extends BaseSubscriber<T> {
     private CountDownLatch latch;
     private final int subscriberId;
 
+
+
     public SimpleLogSubscriber(CountDownLatch latch, int subscriberId) {
         this.latch = latch;
         this.subscriberId = subscriberId;
@@ -27,6 +29,7 @@ public class SimpleLogSubscriber<T> extends BaseSubscriber<T> {
     @Override
     protected void hookOnNext(T value) {
         log.info("Subscriber {} received onNext:{}", subscriberId, value);
+
     }
 
     @Override

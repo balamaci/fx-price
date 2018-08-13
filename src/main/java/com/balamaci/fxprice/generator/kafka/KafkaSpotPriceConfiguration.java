@@ -10,6 +10,7 @@ import org.apache.kafka.common.errors.WakeupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,8 +29,8 @@ public class KafkaSpotPriceConfiguration {
     @Autowired
     private KafkaConsumer<String, Quote> consumer;
 
-    @Autowired
-    private List<String> kafkaTopics;
+    @Value("${kafka_consumer.topic}")
+    private String kafkaTopic;
 
     @Bean
     public Flux<Quote> generateSpotPrices() {
@@ -39,8 +40,8 @@ public class KafkaSpotPriceConfiguration {
 
     private void receiveSpotPrices(FluxSink<Quote> sink) {
         try {
-            consumer.subscribe(kafkaTopics);
-            log.info("KafkaConsumer subscribed to {} ..." + kafkaTopics);
+            consumer.subscribe(Collections.singletonList(kafkaTopic));
+            log.info("KafkaConsumer subscribed");
 
             while (true) {
                 if(sink.isCancelled()) {

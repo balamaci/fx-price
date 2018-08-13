@@ -1,6 +1,7 @@
-generator: fake
+#generator: fake
+generator: kafka
 
 kafka_consumer:
   consumer_id: spot_price
-  bootstrap_servers:
-  topics:
+  bootstrap_servers: "127.0.0.1:9092"
+  topic: spot_rates

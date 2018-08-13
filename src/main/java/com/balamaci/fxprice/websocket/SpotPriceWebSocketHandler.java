@@ -12,7 +12,6 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class SpotPriceWebSocketHandler implements WebSocketHandler {
@@ -30,12 +29,12 @@ public class SpotPriceWebSocketHandler implements WebSocketHandler {
     }
 
     @Override
-	public Mono<Void> handle(WebSocketSession session) {
+    public Mono<Void> handle(WebSocketSession session) {
+
         log.info("New web socket connection {}", subscrId.incrementAndGet());
 
-		Flux<WebSocketMessage> wsMessage = spotPricesStream
-                .log("com.balamaci.ws-handler")
-                .onBackpressureDrop(val -> log.info("******DROPPED " + val))
+        Flux<WebSocketMessage> wsMessage = spotPricesStream
+                .onBackpressureDrop(val -> log.info("**DROPPED {}", val))
                 .map((price) -> {
                     try {
                         String json = jsonWriter.writeValueAsString(price);
@@ -45,12 +44,10 @@ public class SpotPriceWebSocketHandler implements WebSocketHandler {
                         throw new RuntimeException(e);
                     }
                 })
+                .log("com.balamaci.ws-handler")
                 .map(session::textMessage);
 
-        if(subscrId.get() % 2 == 0) {
-            wsMessage = wsMessage.delayElements(Duration.ofMillis(1000));
-        }
+        return session.send(wsMessage);
+    }
 
-	    return session.send(wsMessage);
-	}
 }
