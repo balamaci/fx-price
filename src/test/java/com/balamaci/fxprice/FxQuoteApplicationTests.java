@@ -36,10 +36,10 @@ import java.util.concurrent.Future;
 import static kafka.admin.RackAwareMode.Disabled$.MODULE$;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class FxQuoteApplicationTests {
 
-	private static final int EVENTS_TO_GENERATE = 20_000;
+	private static final int EVENTS_TO_GENERATE = 20;
 
 	private static final String BROKER_HOST = "127.0.0.1";
 	private int brokerPort = 9092;

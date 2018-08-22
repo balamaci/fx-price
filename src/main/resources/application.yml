@@ -1,4 +1,5 @@
 #generator: fake
+port: 8080
 generator: kafka
 
 kafka_consumer:
