@@ -1,6 +1,7 @@
-#generator: fake
 port: 8080
-generator: kafka
+
+generator: fake
+#generator: kafka
 
 kafka_consumer:
   consumer_id: spot_price

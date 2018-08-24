@@ -30,8 +30,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static kafka.admin.RackAwareMode.Disabled$.MODULE$;
 
@@ -110,21 +110,18 @@ public class FxQuoteApplicationTests {
 		RandomQuoteGenerator randomQuoteGenerator = new RandomQuoteGenerator();
 		log.info("Started generating and pushing events to Kafka...");
 
-		try {
-			for(int i=1; i <= EVENTS_TO_GENERATE; i++) {
-				if(i % 1000 == 0) {
-					log.info("Generated {} quotes", i);
-				}
+		AtomicInteger eventNo = new AtomicInteger();
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-				Quote quote = randomQuoteGenerator.generate();
-
-				Future<RecordMetadata> responseFuture = kafkaProducer.
-						send(new ProducerRecord<>(spotTopic, i, jsonWriter.writeValueAsString(quote)));
-				responseFuture.get();
-			}
-		} catch (Exception e) {
-			log.error("Exception encountered", e);
-		}
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                Quote quote = randomQuoteGenerator.generate();
+                Future<RecordMetadata> responseFuture = kafkaProducer.
+                        send(new ProducerRecord<>(spotTopic, eventNo.incrementAndGet(), jsonWriter.writeValueAsString(quote)));
+            } catch (Exception e) {
+                log.error("Exception encountered", e);
+            }
+        }, 0, 1, TimeUnit.SECONDS);
 	}
 
 	private class KafkaServerHolder {

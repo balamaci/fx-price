@@ -5,6 +5,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,7 +15,7 @@ import java.util.Properties;
  * @author sbalamaci
  */
 @Configuration
-//@ConditionalOnProperty(value = "generator", havingValue = "kafka")
+@ConditionalOnProperty(value = "generator", havingValue = "kafka")
 public class KafkaConsumerConfiguration {
 
     @Value("${kafka_consumer.bootstrap_servers}")
@@ -43,6 +44,5 @@ public class KafkaConsumerConfiguration {
 
         return new KafkaConsumer<>(props);
     }
-
 
 }
