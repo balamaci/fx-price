@@ -4,11 +4,14 @@ import java.math.BigDecimal;
 
 public class Quote {
 
-    private final CurrencyPair currencyPair;
+    private CurrencyPair currencyPair;
 
-    private final Side side;
+    private Side side;
 
-    private final BigDecimal price;
+    private BigDecimal price;
+
+    public Quote() {
+    }
 
     public Quote(CurrencyPair currencyPair, Side side, BigDecimal price) {
         this.currencyPair = currencyPair;

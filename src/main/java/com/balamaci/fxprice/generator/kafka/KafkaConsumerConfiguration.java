@@ -1,6 +1,5 @@
 package com.balamaci.fxprice.generator.kafka;
 
-import com.balamaci.fxprice.entity.Quote;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
@@ -25,7 +24,7 @@ public class KafkaConsumerConfiguration {
     private String consumerId;
 
     @Bean
-    public KafkaConsumer<String, Quote> createKafkaConsumer() {
+    public KafkaConsumer<Integer, String> createKafkaConsumer() {
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, consumerId);

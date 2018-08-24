@@ -63,9 +63,9 @@ public class KafkaSpotPriceConfiguration {
                                 topicPartition.topic(), record.partition(), record.offset(),
                                 record.timestamp(), record.value());
 
-                        Quote quote = jsonReader.readva(record.value(), Quote.class);
+                        Quote quote = jsonReader.forType(Quote.class).readValue(record.value());
 
-                        sink.next(record.value());
+                        sink.next(quote);
                     }
 
                     long lastPartitionOffset = topicRecords.get(topicRecords.size() - 1).offset();
