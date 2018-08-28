@@ -23,21 +23,22 @@ public class FakeSpotPriceConfiguration {
 
     @Bean
     public Flux<Quote> generateSpotPrices() {
-        return Flux.<Quote>push(sink -> {
-            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-
-            scheduler.scheduleAtFixedRate(() -> {
-                        if (!sink.isCancelled()) {
-                            Quote quote = randomQuoteGenerator.generate();
-
-                            log.info("Pushing {}", quote);
-                            sink.next(quote);
-                        }
-                    }
-                , 0, 5, TimeUnit.SECONDS);
-        }, FluxSink.OverflowStrategy.LATEST)
+        return Flux.push(this::generateRandomPrices, FluxSink.OverflowStrategy.LATEST)
                 .share();
     }
 
+    private void generateRandomPrices(FluxSink<Quote> sink) {
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
+        scheduler.scheduleAtFixedRate(() -> {
+                    if (!sink.isCancelled()) {
+                        Quote quote = randomQuoteGenerator.generate();
+
+                        log.info("Pushing {}", quote);
+                        sink.next(quote);
+                    }
+                }
+                , 0, 500, TimeUnit.MILLISECONDS);
+    }
 
 }

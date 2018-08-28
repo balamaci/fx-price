@@ -38,7 +38,8 @@ public class KafkaSpotPriceConfiguration {
 
     @Bean
     public Flux<Quote> generateSpotPrices() {
-        return Flux.<Quote>push(this::receiveSpotPrices);
+        return Flux.<Quote>push(this::receiveSpotPrices, FluxSink.OverflowStrategy.LATEST)
+                .share();
     }
 
 
@@ -47,11 +48,7 @@ public class KafkaSpotPriceConfiguration {
             consumer.subscribe(Collections.singletonList(kafkaTopic));
             log.info("KafkaConsumer subscribed");
 
-            while (true) {
-                if(sink.isCancelled()) {
-                    return;
-                }
-
+            while (! sink.isCancelled()) {
                 log.debug("Consumer polling ...");
                 ConsumerRecords<Integer, String> records = consumer.poll(Long.MAX_VALUE);
                 log.debug("Received {} records", records.count());

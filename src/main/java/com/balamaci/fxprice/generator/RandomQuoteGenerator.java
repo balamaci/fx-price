@@ -21,11 +21,12 @@ public class RandomQuoteGenerator {
     private static final List<Pair<CurrencyPair, Double>> pairs = new ArrayList<>();
 
     static {
-        pairs.add(new Pair<>(CurrencyPair.EUR_USD, 0.3));
+        pairs.add(new Pair<>(CurrencyPair.EUR_USD, 0.2));
         pairs.add(new Pair<>(CurrencyPair.EUR_SGD, 0.2));
         pairs.add(new Pair<>(CurrencyPair.EUR_CHF, 0.2));
         pairs.add(new Pair<>(CurrencyPair.EUR_GBP, 0.2));
         pairs.add(new Pair<>(CurrencyPair.EUR_JPY, 0.1));
+        pairs.add(new Pair<>(CurrencyPair.GBP_USD, 0.1));
     }
 
     private EnumeratedDistribution<CurrencyPair> randCurrencyDistribution =

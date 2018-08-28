@@ -118,6 +118,7 @@ public class FxQuoteApplicationTests {
                 Quote quote = randomQuoteGenerator.generate();
                 Future<RecordMetadata> responseFuture = kafkaProducer.
                         send(new ProducerRecord<>(spotTopic, eventNo.incrementAndGet(), jsonWriter.writeValueAsString(quote)));
+                responseFuture.get();
             } catch (Exception e) {
                 log.error("Exception encountered", e);
             }
